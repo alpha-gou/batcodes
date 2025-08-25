@@ -74,12 +74,13 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 nohup python3 -m vllm.entrypoints.openai.ap
 #     --host 0.0.0.0 --port 8986 --trust-remote-code \
 #     --served-model-name xg_model
 
-export VLLM_WORKER_MULTIPROC_METHOD=spawn   # 使用魔塔默认的vllm的环境时要加上这个
+export VLLM_WORKER_MULTIPROC_METHOD=spawn   # 使用魔搭默认的vllm的环境时要加上这个
 CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python3 -m vllm.entrypoints.openai.api_server \
     --model /workspace/models/QwQ-32B --dtype auto --tensor-parallel-size 4 \
     --gpu-memory-utilization 0.98 --disable-custom-all-reduce --enforce-eager \
     --host 0.0.0.0 --port 8986 --trust-remote-code \
     --served-model-name gscore > logs/vllm_8986_log.txt 2>&1 &
+
 CUDA_VISIBLE_DEVICES=4,5,6,7 nohup python3 -m vllm.entrypoints.openai.api_server \
     --model /workspace/models/Qwen3-32B --dtype auto --tensor-parallel-size 4 \
     --gpu-memory-utilization 0.98 --disable-custom-all-reduce --enforce-eager \
