@@ -1,0 +1,46 @@
+### model
+model_name_or_path: /workspace/ningwang/xg/model_res/fp_res/xg_v2.2_qw2.5_32b_math_step_1000
+# model_name_or_path: output/v3.1_res/checkpoint-700
+
+### method
+stage: dpo
+do_train: true
+finetuning_type: full
+deepspeed: ds_z3_config.json
+
+### dataset
+dataset: xg_train_dpo_clean_2w,xg_train_dpo_clean_7w
+template: qwen
+cutoff_len: 3200
+# max_samples: 500000
+overwrite_cache: true
+preprocessing_num_workers: 32
+
+### output
+output_dir: output
+logging_steps: 1
+save_steps: 100
+plot_loss: true
+overwrite_output_dir: true
+
+### train
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 16
+learning_rate: 3.0e-7
+num_train_epochs: 2
+lr_scheduler_type: cosine
+warmup_ratio: 0.1
+bf16: true
+ddp_timeout: 180000000
+
+### eval
+# val_size: 0.0001
+# per_device_eval_batch_size: 1
+# eval_strategy: steps
+# eval_steps: 1000000
+
+# save mode
+save_only_model: true
+
+### report to wandb
+report_to: wandb

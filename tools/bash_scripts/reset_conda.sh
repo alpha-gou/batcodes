@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# ---------- 环境清理阶段 ----------
+# 仅清除明确指定的CONDA变量（安全模式）
+conda_vars=$(env | grep -oE '^CONDA_[A-Z_]+' | paste -sd ' ')
+for var in $conda_vars; do
+    unset "$var"
+done
+unset CONDA_PREFIX CONDA_DEFAULT_ENV 2>/dev/null
+
+# 安全过滤PATH（保留系统路径）
+export PATH=$(echo "$PATH" | 
+    /usr/bin/tr ':' '\n' | 
+    /bin/grep -vE 'conda|anaconda' | 
+    /usr/bin/paste -sd: -
+)
+
+# ---------- Conda初始化阶段 ----------
+CONDA3_PATH="/data/homework/anaconda3"
+
+# 诊断conda路径
+if [[ ! -d "$CONDA3_PATH" ]]; then
+    echo "[ERROR] Conda路径不存在: $CONDA3_PATH" >&2
+    exit 127
+fi
+
+# 动态初始化（避免重复初始化）
+if [[ -z "$CONDA_INITIALIZED" ]]; then
+    # 前置路径设置
+    export PATH="$CONDA3_PATH/condabin:$CONDA3_PATH/bin:$PATH"
+    
+    # 检查conda可执行性
+    if [[ ! -x "$CONDA3_PATH/bin/conda" ]]; then
+        echo "[ERROR] Conda不可执行: $CONDA3_PATH/bin/conda" >&2
+        exit 126
+    fi
+
+    # 初始化hook
+    eval "$("$CONDA3_PATH/bin/conda" shell.bash hook)"
+    export CONDA_INITIALIZED=1
+fi
+
+# ---------- 环境激活阶段 ----------
+# 防御性激活（带错误捕获）
+conda activate wn 2>/dev/null || {
+    echo "[WARNING] 激活wn环境失败，尝试创建该环境"
+    conda create -n wn python=3.8 -y
+    conda activate wn
+}
+
+# ---------- 验证阶段 ----------
+echo "当前环境路径：$CONDA_PREFIX"
+echo "Python路径：$(which python)"

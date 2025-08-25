@@ -1,0 +1,23 @@
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+unset NCCL_SOCKET_NTHREADS
+unset NCCL_NSOCKS_PERTHREAD
+unset NCCL_SOCKET_IFNAME
+unset NCCL_IB_DISABLE
+unset NCCL_MAX_NRINGS
+unset NCCL_P2P_DISABLE
+unset NCCL_NET_GDR_LEVEL
+export NCCL_DEBUG=INFO
+export NCCL_SOCKET_IFNAME=eth0
+export NCCL_IB_GID_INDEX=3
+export NCCL_IB_DISABLE=0
+export NCCL_IB_HCA=mlx5_bond_0,mlx5_bond_1,mlx5_bond_2,mlx5_bond_3,mlx5_bond_4,mlx5_bond_5,mlx5_bond_6,mlx5_bond_7
+export NCCL_NET_GDR_LEVEL=3
+export NCCL_IB_QPS_PER_CONNECTION=4
+export NCCL_IB_TC=160
+
+#export WANDB_DISABLED=true
+export WANDB_BASE_URL="http://172.29.213.162:8900"
+export WANDB_API_KEY="local-7fdf70a47979d344ad6550e1032ba39b48cc110f"
+export WANDB_PROJECT=$(basename "$PWD")
+
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True FORCE_TORCHRUN=1 NNODES=2 RANK=0 MASTER_ADDR=10.126.218.86 MASTER_PORT=29500 llamafactory-cli train qwen2_full_sft_ds3.yaml

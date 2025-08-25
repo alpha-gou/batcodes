@@ -1,0 +1,21 @@
+### model
+model_name_or_path: /data/workspace/models/Qwen2.5-Math-72B-Instruct
+
+### method
+stage: pt
+do_train: true
+finetuning_type: full
+lora_target: all
+
+### dataset
+dataset: overseas_us_pag
+template: qwen
+cutoff_len: 3500
+# max_samples: 1000
+overwrite_cache: true
+preprocessing_num_workers: 16
+tokenized_path: /data/workspace/zhuwei07/pag
+
+### output
+output_dir: output
+overwrite_output_dir: true

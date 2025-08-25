@@ -1,0 +1,46 @@
+### model
+model_name_or_path: /workspace/models/Qwen2.5-Math-72B-Instruct
+
+### method
+stage: sft
+do_train: true
+finetuning_type: full
+deepspeed: ds_z3_config.json
+
+### dataset
+dataset: xg_train_data_v4.1_qda_sft_15w
+template: qwen
+cutoff_len: 4096
+# max_samples: 450000
+overwrite_cache: true
+preprocessing_num_workers: 32
+
+### output
+output_dir: output
+logging_steps: 1
+save_steps: 20
+plot_loss: true
+overwrite_output_dir: true
+
+### train
+per_device_train_batch_size: 4
+gradient_accumulation_steps: 1
+learning_rate: 5.0e-6
+num_train_epochs: 500
+lr_scheduler_type: cosine
+warmup_ratio: 0.005
+# warmup_steps: 10
+bf16: true
+ddp_timeout: 180000000
+
+### eval
+# val_size: 0.00001
+# per_device_eval_batch_size: 1
+# eval_strategy: steps
+# eval_steps: 4000000
+
+# save mode
+save_only_model: true
+
+### report to wandb
+report_to: wandb
