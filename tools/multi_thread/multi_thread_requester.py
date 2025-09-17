@@ -99,29 +99,25 @@ class MultiThreadRequester:
 
     def load_csv(self, csv_path):
         df = pd.read_csv(csv_path)
+        self.col_list = list(df.columns)
         rows_dicts = df.to_dict(orient="records")
-        self.data_cols = list(rows_dicts[0].keys())
         for data in rows_dicts:
             self.add_data(data)
 
-    def output_to_csv(self, output_path, col_list:list=None, add_cols:list=None, append=False):
+    def output_to_csv(self, output_path, col_list:list=None, add_cols:list=None):
         """
         参数说明：
         - output_csv: 输出CSV文件路径
-        - col_list: 输出CSV文件列名，全量替换
+        - col_list: 输出CSV文件列名，全量替换；为空时使用原列名
         - add_cols: 输出CSV文件列名，原列增加
-        - append: 增量写入（未完成）
         """
         self.csv_lock = threading.Lock()  # CSV写入锁
         self.output_csv = output_path
         if col_list is not None:
             self.col_list = col_list
         elif add_cols is not None:
-            self.col_list = self.data_cols + add_cols
-        elif not append:
-            raise ValueError("output col names error !!!")
-        if not append:
-            self._init_csv()
+            self.col_list = self.col_list + add_cols
+        self._init_csv()
 
     def conitnue_run(self, input_csv, output_csv, key):
         """
