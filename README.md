@@ -11,16 +11,22 @@
 并发工具：  multi_thread
 
 
-## llama_factory
+## llm_training
 
-llama_factory 框架常用脚本
+大模型训练，包括：
+
+llama_factory: 框架常用脚本
+
+accelerate: accelerate框架脚本
+
+## frameworks
+
+部署框架，包括：
+
+vllm_server  vllm服务常用启动脚本
+
+trt_server   trt服务框架
+
+python_server  python服务框架
 
 
-## vllm_server
-
-vllm服务常用启动脚本
-
-
-## accelerate
-
-accelerate框架脚本
