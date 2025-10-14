@@ -459,7 +459,7 @@ class OpenAIServer:
 
     async def __call__(self, host, port):
         # Store the binding address for server registration
-        self.binding_addr = f"http://{host}:{port}"
+        self.binding_addr = f"https://{host}:{port}"
         config = uvicorn.Config(self.app,
                                 host=host,
                                 port=port,
