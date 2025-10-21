@@ -1,0 +1,24 @@
+# 这个配置不用了，无需单独上线配置
+datastack:
+    group_name: "aigc_backlog_queue"
+    req_queue_name: "aivideo_math_req"       # 请求队列
+    mid_queue_name: "aivideo_math_mid"       # 路由队列
+    rm_queue_name: "aivideo_math_rm"         # 评分队列
+    oline_queue_name: "aivideo_math_online"  # 结果队列
+    batchsize: 1
+
+main:
+    sleep_seconds: 600
+    generate_main_thread_num: 5
+    # 线上svc：
+    callback_url: "http://gvideo-hub-svc.tiku:8080/gvideo-hub/callback/scriptrewrite"
+    # ship环境域名：
+    # callback_url: "http://luban-llmproxy-cc.suanshubang.cc/gvideo-hub/callback/scriptrewrite"
+    # ship环境svc: 
+    # callback_url: "http://gvideo-hub-svc.tiku-llmproxy:8080/gvideo-hub/callback/scriptrewrite"
+    qa_user: "wangning40"
+    # subject_url: "http://base-label-server-svc.rec-strategy:8080/get_sub_dep_label"
+    subject_url: "http://base-label-server.rec-strategy.zuoyebang.dd/get_sub_dep_label"
+    # qa_url: "http://learnpro-svc.rec-strategy:8080/learnpro/tid_processed_content"
+    qa_url: "http://learnpro.rec-strategy.zuoyebang.dd/learnpro/tid_processed_content"
+
