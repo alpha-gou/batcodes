@@ -107,7 +107,7 @@ def main():
   python batch_rename.py /path/to/directory "old" "new"
         '''
     )
-    
+
     parser.add_argument('directory', help='要处理的目录路径')
     parser.add_argument('pattern', help='要匹配的正则表达式模式')
     parser.add_argument('replacement', nargs='?', default='', 
