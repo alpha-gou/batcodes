@@ -1,0 +1,57 @@
+# 模版可参考下面的网页：
+# https://www.toptal.com/developers/gitignore/
+
+# 项目特定忽略
+*.egg-info/
+
+# Python 字节码缓存文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyi
+.Python
+
+# Python 虚拟环境 (通常命名为 venv, env, .venv 等)
+venv/
+env/
+.venv/
+ENV/
+
+# 安装包和分发目录
+dist/
+build/
+*.egg
+*.eggs
+
+# 单元测试和代码覆盖率报告
+.pytest_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.cache
+nosetests.xml
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# 日志文件
+*.log
+logs/
+
+# 操作系统生成的文件
+Thumbs.db
+.DS_Store
+
+# IDE 配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 环境变量文件（可能包含敏感信息如API密钥）
+.env
+.venv
+.env.local
+.env.production
