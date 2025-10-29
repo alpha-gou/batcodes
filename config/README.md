@@ -36,3 +36,7 @@ Linux: ~/.config/sublime-text-3/Packages/User/
 ```
 cp ./Default\ \(OSX\).sublime-keymap ~/Library/Application\ Support/Sublime\ Text/Packages/User/  
 ```
+
+## zshrc
+
+看情况使用，主要是alias配置
