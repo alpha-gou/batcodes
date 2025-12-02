@@ -8,6 +8,9 @@ import time
 from tqdm import tqdm
 
 
+JSON_HEADERS = {"Content-Type": "application/json"}
+
+
 class TokenBucket:
     """简化的令牌桶算法实现"""
     def __init__(self, capacity, fill_rate):
@@ -107,7 +110,6 @@ class MultiThreadRequester:
         for data in rows_dicts:
             self.add_data(data)
 
-
     def output_to_csv(self, output_path, col_list:list=None, add_cols:list=None):
         """
         参数说明：
@@ -158,14 +160,13 @@ class MultiThreadRequester:
         self.pbar.close()
         self.shutdown()  # 关闭服务
 
-    def post_vllm_thinking(self, json_data):
+    def post_vllm_thinking(self, json_data, headers=JSON_HEADERS):
         """
         post请求带thinking的vllm服务
         """
         thinking, result = "", ""
         for attempt in range(self.retry_attempts + 1):
             try:
-                headers = {"Content-Type": "application/json"}
                 response = requests.post(self.api_url, headers=headers, json=json_data).json()
                 content = response['choices'][0]['message']['content']
                 content = content.strip("<think>").strip("\n")
@@ -178,9 +179,8 @@ class MultiThreadRequester:
                 break
         return thinking, result
 
-    def post_vllm_stream_thinking(self, json_data):
+    def post_vllm_stream_thinking(self, json_data, headers=JSON_HEADERS):
         text, thinking, result = "", "", ""
-        headers = {"Content-Type": "application/json"}
         try:
             with requests.post(
                 self.api_url, headers=headers, json=json_data, stream=True
