@@ -99,10 +99,14 @@ class MultiThreadRequester:
 
     def load_csv(self, csv_path):
         df = pd.read_csv(csv_path)
+        self.load_dataframe(df)
+
+    def load_dataframe(self, df):
         self.col_list = list(df.columns)
         rows_dicts = df.to_dict(orient="records")
         for data in rows_dicts:
             self.add_data(data)
+
 
     def output_to_csv(self, output_path, col_list:list=None, add_cols:list=None):
         """
