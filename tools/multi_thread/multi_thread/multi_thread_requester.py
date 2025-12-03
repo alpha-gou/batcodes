@@ -203,7 +203,6 @@ class MultiThreadRequester:
 
     def request_main(self, data):
         """请求的主逻辑，须重写此函数"""
-        headers = {"Content-Type": "application/json"}
         enable_thinking = True
         prompt = ""
         if enable_thinking:
