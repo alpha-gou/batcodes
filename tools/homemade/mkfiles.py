@@ -9,6 +9,7 @@ def create_integer_files(a, b, format_str="md"):
     参数:
     a -- 起始整数
     b -- 结束整数
+    format_str -- 文件扩展名
     """
     # 确保a和b是整数且a <= b
     try:
@@ -23,8 +24,16 @@ def create_integer_files(a, b, format_str="md"):
     
     # 创建文件
     created_count = 0
+    skipped_count = 0
     for i in range(a, b + 1):
         filename = f"{i}.{format_str}"
+        
+        # 检查文件是否已存在
+        if os.path.exists(filename):
+            print(f"文件 {filename} 已存在，跳过...")
+            skipped_count += 1
+            continue
+            
         try:
             with open(filename, 'w', encoding='utf-8') as file:
                 file.write(f"第{i} \n")
@@ -34,6 +43,8 @@ def create_integer_files(a, b, format_str="md"):
             print(f"创建文件 {filename} 时出错: {e}")
     
     print(f"\n成功创建了 {created_count} 个文件")
+    if skipped_count > 0:
+        print(f"跳过了 {skipped_count} 个已存在的文件")
     return True
 
 
@@ -44,13 +55,16 @@ def main():
         a, b = sys.argv[1], sys.argv[2]
         format_str = "md"
     elif len(sys.argv) == 4:
-        # 从命令行参数获取a和b
+        # 从命令行参数获取a、b和format_str
         a, b, format_str = sys.argv[1], sys.argv[2], sys.argv[3]
     else:
         # 交互式输入
         try:
             a = input("请输入起始整数 a: ")
             b = input("请输入结束整数 b: ")
+            format_str = input("请输入文件格式 (默认: md): ").strip()
+            if not format_str:
+                format_str = "md"
         except KeyboardInterrupt:
             print("\n用户取消操作")
             return
