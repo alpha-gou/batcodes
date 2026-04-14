@@ -5,6 +5,8 @@ import queue
 import requests
 import threading
 import time
+import functools
+from typing import Callable, Optional
 from tqdm import tqdm
 
 
@@ -31,13 +33,14 @@ class TokenBucket:
 
 
 class MultiThreadRequester:
-    def __init__(self, api_url, max_workers, rate_limit, retry_attempts=2):
+    def __init__(self, api_url, max_workers, rate_limit, retry_attempts=2, enable_timing=False):
         """
         参数说明：
-        - api_url: vLLM服务地址
-        - max_workers: 最大线程数，黄金配比公式为：max_workers = rate_limit × 1.2
-        - rate_limit: 每秒请求数限制，即目标QPS值
-        - retry_attempts: 失败重试次数
+            api_url: vLLM服务地址
+            max_workers: 最大线程数，黄金配比公式为：max_workers = rate_limit × 1.2
+            rate_limit: 每秒请求数限制，即目标QPS值
+            retry_attempts: 失败重试次数
+            enable_timing: 启用请求计时
         """
         # 核心配置
         self.api_url = api_url
@@ -53,8 +56,9 @@ class MultiThreadRequester:
         self.rate_lock = threading.Lock()
 
         # 输出配置
-        self.csv_lock = None
-        self.output_csv = None
+        self.csv_lock = threading.Lock()  # CSV写入锁
+        self.output_csv = ""
+        self._enable_timing = enable_timing  # 请求计时
 
         # 进度条
         self.total_data = 0
@@ -66,6 +70,45 @@ class MultiThreadRequester:
             t.daemon = True
             t.start()
             self.worker_threads.append(t)
+
+    @staticmethod
+    def _timing_decorator(enabled: Optional[bool] = None, func_name: Optional[str] = None):
+        """
+        类内部计时装饰器
+        
+        Args:
+            enabled: 是否启用计时 (None=使用实例开关)
+            func_name: 自定义函数显示名称
+            
+        Returns:
+            返回 (原函数结果, elapsed) 的元组
+        """
+        def decorator(func: Callable):
+            # 获取函数显示名称
+            display_name = func_name or func.__name__
+            
+            @functools.wraps(func)
+            def wrapper(self_obj, *args, **kwargs):
+                # 确定是否启用计时 (优先级: 装饰器参数 > 实例属性)
+                is_enabled = enabled
+                if is_enabled is None:
+                    is_enabled = self_obj._enable_timing
+                
+                # 如果未启用计时，直接执行函数
+                if not is_enabled:
+                    result = func(self_obj, *args, **kwargs)
+                    return result
+                
+                # 记录开始时间
+                start_time = time.perf_counter()
+                # 执行被装饰的函数
+                result = func(self_obj, *args, **kwargs)
+                # 计算耗时
+                elapsed = time.perf_counter() - start_time
+                return *result, elapsed
+            
+            return wrapper
+        return decorator
 
     def _init_csv(self):
         """初始化CSV文件头"""
@@ -98,10 +141,14 @@ class MultiThreadRequester:
             # 请求执行
             self.request_main(data)
             self.task_queue.task_done()
-            self.pbar.update(1)
+            self.pbar.update(1) # type: ignore
 
     def load_csv(self, csv_path):
         df = pd.read_csv(csv_path)
+        self.load_dataframe(df)
+
+    def load_excel(self, excel_path):
+        df = pd.read_excel(excel_path)
         self.load_dataframe(df)
 
     def load_dataframe(self, df):
@@ -110,14 +157,14 @@ class MultiThreadRequester:
         for data in rows_dicts:
             self.add_data(data)
 
-    def output_to_csv(self, output_path, col_list:list=None, add_cols:list=None):
+    def output_to_csv(self, output_path, col_list=None, add_cols=None):
         """
         参数说明：
         - output_csv: 输出CSV文件路径
         - col_list: 输出CSV文件列名，全量替换；为空时使用原列名
         - add_cols: 输出CSV文件列名，原列增加
         """
-        self.csv_lock = threading.Lock()  # CSV写入锁
+        # self.csv_lock = threading.Lock()  # CSV写入锁
         self.output_csv = output_path
         if col_list is not None:
             self.col_list = col_list
@@ -140,7 +187,8 @@ class MultiThreadRequester:
         self.data_cols = list(rows_dicts[0].keys())
         for data in rows_dicts:
             self.add_data(data)
-        self.output_to_csv(output_csv, append=True)
+        # self.csv_lock = threading.Lock()  # CSV写入锁
+        self.output_csv = output_csv
 
     def add_data(self, data):
         """添加待处理数据到处理队列"""
@@ -160,6 +208,17 @@ class MultiThreadRequester:
         self.pbar.close()
         self.shutdown()  # 关闭服务
 
+    @_timing_decorator()
+    def post_vllm(self, json_data, headers=JSON_HEADERS):
+        try:
+            response = requests.post(self.api_url, headers=headers, data=json_data).json()
+            content = response['choices'][0]['message']['content']
+            return response, content
+        except Exception as e:
+            print(e)
+            return e, ""
+
+    @_timing_decorator()
     def post_vllm_thinking(self, json_data, headers=JSON_HEADERS):
         """
         post请求带thinking的vllm服务
@@ -174,11 +233,12 @@ class MultiThreadRequester:
                 thinking = contents[0].strip("\n")
                 result = contents[1].strip("\n")
             except Exception as e:
-                print(e)
+                print("Warning: post attempt", attempt, "error:", e)
             else:
                 break
         return thinking, result
 
+    @_timing_decorator()
     def post_vllm_stream_thinking(self, json_data, headers=JSON_HEADERS):
         text, thinking, result = "", "", ""
         try:
