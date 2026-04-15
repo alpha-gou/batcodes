@@ -14,9 +14,9 @@ JSON_HEADERS = {"Content-Type": "application/json"}
 
 
 class TokenBucket:
-    """简化的令牌桶算法实现"""
-    def __init__(self, capacity, fill_rate):
-        self.capacity = capacity
+    """简化的令牌桶算法实现，支持低速率（<1 QPS）"""
+    def __init__(self, fill_rate):
+        self.capacity = max(1, fill_rate)
         self.tokens = capacity
         self.fill_rate = fill_rate
         self.last_update = time.time()
@@ -33,14 +33,18 @@ class TokenBucket:
 
 
 class MultiThreadRequester:
-    def __init__(self, api_url, max_workers, rate_limit, retry_attempts=2, enable_timing=False):
+    def __init__(
+        self, api_url, max_workers, rate_limit,
+        rate_unit="qps", retry_attempts=2, enable_timing=False
+    ):
         """
         参数说明：
-            api_url: vLLM服务地址
-            max_workers: 最大线程数，黄金配比公式为：max_workers = rate_limit × 1.2
-            rate_limit: 每秒请求数限制，即目标QPS值
-            retry_attempts: 失败重试次数
-            enable_timing: 启用请求计时
+        - api_url:          vLLM服务地址
+        - max_workers:      最大线程数，黄金配比公式为：max_workers = rate_limit × 1.2
+        - rate_limit:       每秒请求数限制，即目标QPS值
+        - rate_unit:        速率单位，"qps"（每秒）或 "qpm"（每分钟）
+        - retry_attempts:   失败重试次数
+        - enable_timing:    启用请求计时
         """
         # 核心配置
         self.api_url = api_url
@@ -52,7 +56,9 @@ class MultiThreadRequester:
         self._shutdown_flag = False
 
         # 速率控制
-        self.token_bucket = TokenBucket(capacity=rate_limit, fill_rate=rate_limit)
+        if rate_unit == "qpm":
+            rate_limit = rate_limit / 60.0
+        self.token_bucket = TokenBucket(fill_rate=rate_limit)
         self.rate_lock = threading.Lock()
 
         # 输出配置
