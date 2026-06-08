@@ -17,7 +17,7 @@ class TokenBucket:
     """简化的令牌桶算法实现，支持低速率（<1 QPS）"""
     def __init__(self, fill_rate):
         self.capacity = max(1, fill_rate)
-        self.tokens = capacity
+        self.tokens = self.capacity
         self.fill_rate = fill_rate
         self.last_update = time.time()
 
