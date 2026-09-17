@@ -19,11 +19,6 @@ llm_training/
 └── llama_factory/       # LLaMA Factory 框架训练脚本
     ├── install_llama_factory.sh   # LLaMA Factory 安装指南（Docker 方式）
     ├── pack.sh                    # 打包脚本
-    ├── old/                       # 旧版脚本归档
-    │   ├── data_preprocess.yaml   # 数据预处理配置
-    │   ├── run_data_preprocess.sh # 数据预处理启动脚本
-    │   ├── start_pt.sh            # PT（预训练）启动脚本
-    │   └── stop_pt.sh             # 停止训练脚本
     └── project_template/          # 项目模板（新训练项目可复制此目录使用）
         ├── train.sh               # 分布式训练启动主脚本（NCCL + torchrun）
         ├── run_lmfc_train.sh      # LLaMA Factory 训练封装脚本

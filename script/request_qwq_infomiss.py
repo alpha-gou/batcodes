@@ -2,7 +2,7 @@ import requests
 import json
 import re
 from multi_thread import MultiThreadRequester
-from qwen_promots import get_qwen_scorint_promot_round1, get_qwen_scorint_promot_round2
+from qwen_prompts import get_qwen_scorint_promot_round1, get_qwen_scorint_promot_round2
 
 
 INFO_MISS_PROMOT = """请判断下面题干的内容是否完整，根据以下规则：
